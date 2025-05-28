@@ -1,0 +1,93 @@
+<div class="mainContainer">
+  <div class="settingsContainer">
+    <div class="modelContainer">
+      <h3>Model: {{model}}</h3>
+      <select [(ngModel)]="model">
+        <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+        <option value="gpt-3.5-turbo-16k">gpt-3.5-turbo-16k</option>
+        <option value="gpt-3.5-turbo-16k-0613">gpt-3.5-turbo-16k-0613</option>
+        <option value="gpt-3.5-turbo-0301">gpt-3.5-turbo-0301</option>
+        <option value="gpt-3.5-turbo-0613">gpt-3.5-turbo-0613</option>
+      </select>
+    </div>
+    
+    <div class="temperatureContainer">
+      <h3>Temperature: {{temperature}}</h3>
+      <input type="range" min="0" max="2" value="0" step="0.1" class="custom-range" id="myRange" [(ngModel)]="temperature">
+    </div>
+
+    <div class="maximunLengthContainer">
+      <h3>Max Tokens: {{maxLength}}</h3>
+      <input type="range" min="1" max="1000" value="1" class="custom-range" id="myRange" [(ngModel)]="maxLength">
+    </div>
+  </div>
+  <div class="mainChatContainer">
+    <div class="chat-container">
+      <div *ngFor="let message of messages" class="message">
+        <div *ngIf="message.role=='user'" class="quest">
+          <p [innerHTML]="message.content"></p>
+        </div>
+        <div *ngIf="message.role=='system'" class="answer">
+          <p [innerHTML]="message.content"></p>
+          <div class="buttons">
+            <button class="custom-button" (click)="copyText(message.content)">
+              <img [src]="'../../../assets/copyButton.svg'" alt="SVG Button" />
+            </button>
+            <button class="custom-button" (click)="repVoice(message.content)">
+              <img [src]="'../../../assets/voiceButton.svg'" alt="SVG Button"/>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="waiting" class="waiting">
+        <div class="spinner"></div>
+      </div>
+      
+
+      <div *ngFor="let conversation of conversations" class="message">
+        <div *ngIf="conversation.quest" class="quest">
+          <p [innerHTML]="conversation.quest"></p>
+        </div>
+        <div *ngIf="conversation.answer" class="answer">
+          <p [innerHTML]="conversation.answer"></p>
+          <div class="buttons">
+            <button class="custom-button" (click)="copyText(conversation.answer)">
+              <img [src]="'../../../assets/copyButton.svg'" alt="SVG Button" />
+            </button>
+            <button class="custom-button" (click)="repVoice(conversation.answer)">
+              <img [src]="'../../../assets/voiceButton.svg'" alt="SVG Button"/>
+            </button>
+          </div>
+        </div>
+        <div *ngIf="conversation.waiting" class="waiting">
+          <div class="spinner"></div>
+        </div>
+
+      </div>
+    </div>
+    <div class="infoContainer">
+      <h2 class="tittleContainer">J A R V I S</h2>
+      <h2>Powered by n8n & OpenAi API <br/>Made by Santiago MejIa</h2>
+      <p>Version 1.0.0</p>
+    </div>
+    
+    <div class="input-container">
+      <div class="input-div">
+        <textarea class="textInput" id="textInput" placeholder="Send a message" [(ngModel)]="inputText" (input)="autoAdjustTextArea($event)" (keydown)="onKeyDown($event)"></textarea>
+      </div>
+      <button class="input-button"  (click)="recMic()" *ngIf="!record">
+        <img [src]="'../../../assets/micButton.svg'" alt="SVG Button" />
+      </button>
+      <button class="input-button" (click)="sendQuest()"  [disabled]="inputText.length <= 1" *ngIf="!record">
+        <img [src]="'../../../assets/sendButton.svg'" alt="SVG Button" />
+      </button>
+
+      <div class="bars" *ngIf="record" ></div>
+
+      <button class="input-button"  (click)="stopRecord()" *ngIf="record">
+        <img [src]="'../../../assets/stopButton.svg'">
+      </button>
+    </div>
+    
+
+</div>

@@ -1,0 +1,41 @@
+header {
+  background-color: #000814;
+  color: #00B4D8;
+  height: 10vh; /* Hacer que el encabezado ocupe el 100% de la altura de la ventana */
+  display: flex; /* Usar Flexbox para centrar horizontal y verticalmente */
+  justify-content: center; /* Centrar horizontalmente */
+  align-items: center; /* Centrar verticalmente */
+}
+
+/* Estilo para el contenedor del título y otros elementos */
+.header-content {
+  text-align: center;
+}
+
+/* Estilo para el texto "J A R V I S" dentro del contenedor */
+.header-text {
+  font-family: 'Koulen', sans-serif;
+  font-size: 50px;
+  margin: 0;
+}
+
+
+
+
+
+
+
+/* .header-content{
+  background-color: #000814;
+  text-align: center;
+  justify-content: center;
+}
+
+
+.header-text{
+  font-size: 50px;
+  color: #00B4D8;
+  font-family: 'Koulen', sans-serif;
+  font-weight: lighter;
+  margin: 0;
+} */
