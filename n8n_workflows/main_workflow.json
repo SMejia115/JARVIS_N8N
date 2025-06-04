@@ -1,0 +1,324 @@
+{
+  "name": "FINAL PROJECT",
+  "nodes": [
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "1e8e8f7e-5fe5-4cf2-a8c3-db7bc6dd84bc",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        80
+      ],
+      "id": "d4204b40-fc7d-4be2-aac5-b275bf79b5ac",
+      "name": "Webhook",
+      "webhookId": "1e8e8f7e-5fe5-4cf2-a8c3-db7bc6dd84bc"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.prompt }}",
+        "options": {
+          "systemMessage": "=Eres un asistente llamado Jarvis, además de contestar preguntas normales, puedes ayudarme a gestionar mi agenda y correo electrónico de la manera más sencilla posible.\n\nPara obtener_eventos, tienes una tool configurada que te devuelve todos los eventos. Tienes la variable after, para indicar la fecha desde la que devuelves eventos, before para la fecha límite y query por si tienes que buscar algo específico.\n\nPuedes crear también eventos en el calendario si te lo piden con el tool crear_evento. Para eso intenta obtener el email de la persona, que usarás como variable attendee, la fecha de inicio que será start_date y la de fin, que será end_date. Por último ponle un summary que refleje lo que te pide, en la variable title.\n\nSi te piden que actualices un evento, utiliza actualizar_evento, pero primero obtén todos con la herramienta de obtener_eventos, busca el event_id y guárdalo en la variable event_id y luego utiliza el tool actualizar_evento, modifica el start y end con las variables start_date y end_date\nSi te piden enviar un correo, puedes usar la tool enviar_correo, debes especificar el correo al que se va a enviar el email en la variable destination, el asunto del correo en la variable subject, y el mensaje del correo de una manera formal y con cortecía en la variable message.\n\nHoy es {{ $now.format('cccc') }} the {{ $now.format('yyyy-MM-dd HH:mm') }}.\n\nSi te preguntan como te llamas, responde Jarvis y pregunta en que puedes ayudar."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        220,
+        100
+      ],
+      "id": "abcd3351-b872-4ed0-b66b-4e357cf8756b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [
+        600,
+        100
+      ],
+      "id": "cae883bf-6afe-42af-9af2-34c95686329a",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-3.5-turbo"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        120,
+        320
+      ],
+      "id": "994df068-161b-4518-9b0c-07294ac8280d",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "EmeEzzQck44c8Wfm",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "santiagomejiaorejuela@gmail.com",
+          "mode": "list",
+          "cachedResultName": "santiagomejiaorejuela@gmail.com"
+        },
+        "start": "={{ $fromAI('start_date', 'La hora y el dìa de inicio del evento') }}",
+        "end": "={{ $fromAI('end_date', 'La hora y el dìa de finalización del evento.') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $fromAI('attendee', 'El email de persona que tienes que invitar.') }}",
+            "santiagomejiaorejuela@gmail.com"
+          ],
+          "summary": "={{ $fromAI('title', 'El titulo de la reunión, intenta hacer un resumen de lo que te pidan para ponerlo en el título.') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        340
+      ],
+      "id": "5c1a8331-63de-4688-8ec0-9b35a84ba6d6",
+      "name": "crear_evento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "X0RvLu2vcFCj0suJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "santiagomejiaorejuela@gmail.com",
+          "mode": "list",
+          "cachedResultName": "santiagomejiaorejuela@gmail.com"
+        },
+        "limit": 10,
+        "timeMin": "={{ $fromAI('after', 'La fecha a partir de la que me devolverás los eventos del calendario') }}",
+        "timeMax": "={{ $fromAI('before', 'La fecha limite hasta la que me devolverás los eventos del calendario') }}",
+        "options": {
+          "query": "={{ $fromAI('query', 'La consulta personalizada si te pide especificar. Déjalo en blanco por defecto si no se especifica lo contrario.') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        680,
+        340
+      ],
+      "id": "996c0c18-010c-493a-8ecc-0f3a12b3f7b6",
+      "name": "obtener_eventos",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "X0RvLu2vcFCj0suJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "santiagomejiaorejuela@gmail.com",
+          "mode": "list",
+          "cachedResultName": "santiagomejiaorejuela@gmail.com"
+        },
+        "eventId": "={{ $fromAI('event_id', 'El id del evento que obtienes del obtener_eventos.') }}",
+        "updateFields": {
+          "end": "={{ $fromAI('end_date', 'La hora y el dìa de finalización del evento.') }}",
+          "start": "={{ $fromAI('start_date', 'La hora y el dìa de inicio del evento.') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        820,
+        340
+      ],
+      "id": "5a51fb45-4b4f-4c45-85b9-4ff71054e831",
+      "name": "actualizar_evento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "X0RvLu2vcFCj0suJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "readStatus": "unread"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        340
+      ],
+      "id": "a4da10e8-6f0d-4ff3-ba51-0e6cc7d923b8",
+      "name": "obtener_correos",
+      "webhookId": "e704218f-4400-4db4-8699-92b988c76ed8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "rycmibXfoC1SfIrH",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI('destination', 'El email al que se quiere enviar el correo.') }}",
+        "subject": "={{ $fromAI('subject', 'El asunto del email  se quiere enviar.') }}",
+        "emailType": "text",
+        "message": "={{ $fromAI('message', 'El texto del email que se quiere enviar de una manera formal y con cortecia.') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        440,
+        340
+      ],
+      "id": "4c7126bb-8f6e-4208-8631-5ef53e6e748d",
+      "name": "enviar_correo",
+      "webhookId": "de93f25c-37f7-44b4-8c2c-8bc58edcb952",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "rycmibXfoC1SfIrH",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "crear_evento": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener_eventos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "actualizar_evento": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener_correos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "enviar_correo": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "abdeea45-82e5-43d0-9b72-edf25e3ae9f2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "639f660882a998fc3b4282b83bf4026d19ade2ad219dcc5a71568c32f46d3915"
+  },
+  "id": "zwosaQQHsIe8XgJI",
+  "tags": []
+}
